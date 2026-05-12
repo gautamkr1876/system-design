@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singleton Pattern — Q&A Reference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-soft: #555;
+    --border: #e5e5e5;
+    --accent: #0066cc;
+    --code-bg: #f4f4f4;
+    --highlight: #fff8e1;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--text-soft);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* Index */
+  .index {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .index-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .index-section {
+    margin-bottom: 1.2rem;
+  }
+
+  .index-section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+
+  .index ol {
+    list-style: none;
+    padding: 0;
+    counter-reset: q-counter;
+  }
+
+  .index li {
+    counter-increment: q-counter;
+    padding: 0.25rem 0;
+    line-height: 1.5;
+  }
+
+  .index li::before {
+    content: counter(q-counter) ".";
+    display: inline-block;
+    width: 2rem;
+    color: var(--text-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .index a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .index a:hover {
+    text-decoration: underline;
+  }
+
+  /* Questions */
+  .qa {
+    margin-bottom: 2.5rem;
+    padding-top: 1rem;
+    scroll-margin-top: 1rem;
+  }
+
+  .qa:target {
+    background: var(--highlight);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1rem 1rem 1.5rem;
+    margin-left: -1.5rem;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+
+  .q {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .q-num {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+
+  .a {
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .a p { margin-bottom: 0.75rem; }
+  .a ul, .a ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+  .a li { margin-bottom: 0.3rem; }
+
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+
+  pre code {
+    background: none;
+    color: var(--text);
+    padding: 0;
+    font-size: 0.88rem;
+  }
+
+  strong, b { color: #000; }
+
+  /* Back to top */
+  .back-top {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .back-top:hover { text-decoration: underline; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Search */
+  .search-wrap {
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 0.5rem 0;
+    z-index: 10;
+  }
+
+  #search {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+  }
+
+  #search:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .qa.hidden { display: none; }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem 1rem 4rem; }
+    h1 { font-size: 1.6rem; }
+    .index { padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body id="top">
+
+<h1>Singleton Pattern</h1>
+<p class="subtitle">JavaScript & Frontend Interview Q&A — click any question in the index to jump to its answer.</p>
+
+<div class="search-wrap">
+  <input type="text" id="search" placeholder="🔍 Search questions...">
+</div>
+
+<!-- ============ INDEX ============ -->
+<nav class="index">
+  <div class="index-title">📚 Index</div>
+
+  <div class="index-section">
+    <div class="index-section-title">Conceptual</div>
+    <ol>
+      <li><a href="#q1">What is the Singleton pattern in JavaScript?</a></li>
+      <li><a href="#q2">Why is Singleton "natural" in JavaScript?</a></li>
+      <li><a href="#q3">Difference between Singleton and a module-level object literal?</a></li>
+      <li><a href="#q4">Is <code>Math</code> a Singleton? <code>window</code>? <code>console</code>?</a></li>
+      <li><a href="#q5">The two-question mental test for Singleton</a></li>
+      <li><a href="#q6">Name 5 real frontend uses of Singleton</a></li>
+      <li><a href="#q7">Downsides of Singletons in React/Vue apps</a></li>
+      <li><a href="#q8">Singleton vs React Context — when to use which?</a></li>
+      <li><a href="#q9">Are Redux/Zustand stores singletons?</a></li>
+      <li><a href="#q10">Does JavaScript need thread-safety for Singletons?</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Implementation</div>
+    <ol start="11">
+      <li><a href="#q11">Write a Singleton using closure (IIFE)</a></li>
+      <li><a href="#q12">Write a Singleton using an ES6 class</a></li>
+      <li><a href="#q13">Write a Singleton using an ES Module (modern way)</a></li>
+      <li><a href="#q14">Why use <code>Object.freeze()</code>?</a></li>
+      <li><a href="#q15">What's the limit of <code>Object.freeze()</code>?</a></li>
+      <li><a href="#q16">Write a lazy Singleton using a getter</a></li>
+      <li><a href="#q17">Write a Singleton WebSocket manager</a></li>
+      <li><a href="#q18">Write a Singleton Event Bus</a></li>
+      <li><a href="#q19">Write the "killer" production API client Singleton</a></li>
+      <li><a href="#q20">Why use <code>static #instance</code> (private)?</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Tricky & Real-World</div>
+    <ol start="21">
+      <li><a href="#q21">How to share a Singleton across browser tabs?</a></li>
+      <li><a href="#q22">Why is module-level Singleton dangerous in Next.js SSR?</a></li>
+      <li><a href="#q23">How does HMR (Hot Module Replacement) affect Singletons?</a></li>
+      <li><a href="#q24">Can you break an ES Module Singleton?</a></li>
+      <li><a href="#q25">Can DevTools mutate a client-side Singleton?</a></li>
+      <li><a href="#q26">What happens to a userService Singleton on logout?</a></li>
+      <li><a href="#q27">Two micro-frontends bundle two copies — how to fix?</a></li>
+      <li><a href="#q28">How to test a component using a Singleton?</a></li>
+      <li><a href="#q29">Make Singleton-using code testable in React</a></li>
+      <li><a href="#q30">How to make a Singleton work across browser tabs (with code)</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">The <code>new</code> Keyword</div>
+    <ol start="31">
+      <li><a href="#q31">Core mental model: when does <code>new</code> work?</a></li>
+      <li><a href="#q32">What does <code>typeof Math</code> return?</a></li>
+      <li><a href="#q33">What does <code>typeof Array</code> return?</a></li>
+      <li><a href="#q34">Which JS built-ins are "blueprints"?</a></li>
+      <li><a href="#q35">Which JS built-ins are "toolboxes"?</a></li>
+      <li><a href="#q36">Can arrow functions be used with <code>new</code>?</a></li>
+      <li><a href="#q37">Can <code>Symbol</code> and <code>BigInt</code> use <code>new</code>?</a></li>
+      <li><a href="#q38">Connection between "can't <code>new</code>" and Singletons</a></li>
+      <li><a href="#q39">Predict: <code>new Math()</code></a></li>
+      <li><a href="#q40">Predict: <code>new JSON()</code></a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Interview Answers</div>
+    <ol start="41">
+      <li><a href="#q41">Most idiomatic Singleton implementation in modern JS?</a></li>
+      <li><a href="#q42">"Is Singleton an anti-pattern?"</a></li>
+      <li><a href="#q43">"Module vs Singleton pattern?"</a></li>
+      <li><a href="#q44">Why does a class Singleton constructor return the existing instance?</a></li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ============ QUESTIONS & ANSWERS ============ -->
+
+<h2>Conceptual</h2>
+
+<div class="qa" id="q1">
+  <div class="q"><span class="q-num">1.</span>What is the Singleton pattern in JavaScript?</div>
+  <div class="a">
+    <p>A design pattern that restricts a class/object to a <b>single instance</b> and provides a global access point to it. In JS, typically implemented via modules, closures, or classes with a static instance reference.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q2">
+  <div class="q"><span class="q-num">2.</span>Why is Singleton "natural" in JavaScript?</div>
+  <div class="a">
+    <p>Because <b>ES modules are cached after first import</b>. Every <code>import</code> returns the same instance — so <code>export default new Service()</code> is automatically a singleton with no extra boilerplate.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q3">
+  <div class="q"><span class="q-num">3.</span>Difference between Singleton and a module-level object literal <code>const obj = {}</code>?</div>
+  <div class="a">
+    <p>Both give one shared instance, but the Singleton pattern adds:</p>
+    <ul>
+      <li><b>Lazy initialization</b></li>
+      <li><b>Controlled access</b></li>
+      <li><b>Private state via closures</b></li>
+      <li>Enforcement that <code>new</code> returns the same instance</li>
+    </ul>
+    <p>Object literal is eagerly created and fully public.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q4">
+  <div class="q"><span class="q-num">4.</span>Is <code>Math</code> a Singleton? <code>window</code>? <code>console</code>?</div>
+  <div class="a">
+    <p><b>Yes, all three are singletons.</b></p>
+    <ul>
+      <li><b><code>Math</code></b> — Built-in object created once at runtime. No constructor (<code>new Math()</code> throws). One shared toolbox for all math operations.</li>
+      <li><b><code>window</code></b> — Single global object per browser tab. Every script sees the same <code>window</code>.</li>
+      <li><b><code>console</code></b> — One shared logging object. <code>console === window.console</code>.</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q5">
+  <div class="q"><span class="q-num">5.</span>The two-question mental test for "is this a Singleton?"</div>
+  <div class="a">
+    <ol>
+      <li>Is there exactly <b>one of it</b> in my program?</li>
+      <li>Can <b>everyone access the same one</b>?</li>
+    </ol>
+    <p>If both = yes → Singleton.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q6">
+  <div class="q"><span class="q-num">6.</span>Name 5 real frontend uses of Singleton.</div>
+  <div class="a">
+    <ul>
+      <li>Logger</li>
+      <li>API/HTTP client</li>
+      <li>WebSocket connection</li>
+      <li>Event bus / PubSub</li>
+      <li>Theme manager</li>
+    </ul>
+    <p>Others: Analytics tracker, Router, Redux/Zustand store, IndexedDB wrapper, Feature flags.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q7">
+  <div class="q"><span class="q-num">7.</span>Name 3 downsides of Singletons in React/Vue apps.</div>
+  <div class="a">
+    <ul>
+      <li><b>Hidden global state</b> → hard to reason about</li>
+      <li><b>Tight coupling</b> → components depend directly, not via props</li>
+      <li><b>Testing pain</b> → must mock the module</li>
+      <li><b>SSR state leaks</b> between requests</li>
+      <li><b>No re-renders</b> when state changes</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q8">
+  <div class="q"><span class="q-num">8.</span>Singleton vs React Context — when to use which?</div>
+  <div class="a">
+    <p><b>Singleton</b>: app-wide service that doesn't need to trigger re-renders (logger, API client, analytics).</p>
+    <p><b>Context</b>: shared state components must <b>react to</b> (theme, auth user, locale). Causes re-renders.</p>
+    <p><b>Best pattern</b>: Singleton holds the logic; Context exposes a reactive slice.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q9">
+  <div class="q"><span class="q-num">9.</span>Are Redux/Zustand stores singletons?</div>
+  <div class="a">
+    <p><b>Yes.</b> Redux: one <code>store</code> created and passed via Provider. Zustand: <code>create()</code> returns a hook tied to one store per module — pure module-singleton pattern.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q10">
+  <div class="q"><span class="q-num">10.</span>Does JavaScript need thread-safety for Singletons?</div>
+  <div class="a">
+    <p><b>No</b> for the main thread — JS is single-threaded with an event loop. No <code>volatile</code>, no double-checked locking needed.</p>
+    <p><b>But</b> Web Workers each have their own JS realm with their own singleton instance. Singletons are per-realm, not truly global.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Implementation</h2>
+
+<div class="qa" id="q11">
+  <div class="q"><span class="q-num">11.</span>Write a Singleton using closure (IIFE).</div>
+  <div class="a">
+<pre><code>const Singleton = (function () {
+  let instance;
+  return {
+    getInstance() {
+      if (!instance) instance = { data: [] };
+      return instance;
+    }
+  };
+})();</code></pre>
+    <p>The closure hides <code>instance</code> — can't be accessed or reassigned externally. Lazy by default.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q12">
+  <div class="q"><span class="q-num">12.</span>Write a Singleton using an ES6 class with private static field.</div>
+  <div class="a">
+<pre><code>class Logger {
+  static #instance = null;
+  constructor() {
+    if (Logger.#instance) return Logger.#instance;
+    Logger.#instance = this;
+    this.logs = [];
+  }
+}</code></pre>
+    <p>The trick: constructor returns the existing instance if one exists. <code>new Logger() === new Logger()</code> is <code>true</code>.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q13">
+  <div class="q"><span class="q-num">13.</span>Write a Singleton using an ES Module (the modern way).</div>
+  <div class="a">
+<pre><code>// logger.js
+class Logger { /* ... */ }
+export default new Logger();</code></pre>
+    <p>Modules are cached, so every <code>import logger from './logger'</code> gets the same instance. Most idiomatic JS singleton.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q14">
+  <div class="q"><span class="q-num">14.</span>Why use <code>Object.freeze()</code> on a Singleton?</div>
+  <div class="a">
+    <p>To make it <b>immutable</b> — prevents accidental or malicious mutation.</p>
+<pre><code>const Config = Object.freeze({
+  apiUrl: '...',
+  timeout: 5000
+});
+Config.apiUrl = 'hacked'; // silently fails</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q15">
+  <div class="q"><span class="q-num">15.</span>What's the limit of <code>Object.freeze()</code>?</div>
+  <div class="a">
+    <p><b>It's shallow.</b> Nested objects are still mutable.</p>
+<pre><code>const o = Object.freeze({ a: { b: 1 } });
+o.a = 2;     // ❌ fails
+o.a.b = 99;  // ✅ succeeds!</code></pre>
+    <p>For full immutability use a deep-freeze utility.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q16">
+  <div class="q"><span class="q-num">16.</span>Write a lazy Singleton using a getter.</div>
+  <div class="a">
+<pre><code>const Service = {
+  _instance: null,
+  get instance() {
+    if (!this._instance)
+      this._instance = new ExpensiveThing();
+    return this._instance;
+  }
+};</code></pre>
+    <p>Useful when construction is expensive.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q17">
+  <div class="q"><span class="q-num">17.</span>Write a Singleton WebSocket manager with auto-reconnect.</div>
+  <div class="a">
+<pre><code>class SocketManager {
+  static #instance;
+  constructor(url) {
+    if (SocketManager.#instance)
+      return SocketManager.#instance;
+    this.url = url;
+    this.connect();
+    SocketManager.#instance = this;
+  }
+  connect() {
+    this.ws = new WebSocket(this.url);
+    this.ws.onclose = () =&gt;
+      setTimeout(() =&gt; this.connect(), 1000);
+  }
+  send(msg) { this.ws.send(JSON.stringify(msg)); }
+}
+export default new SocketManager('wss://...');</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q18">
+  <div class="q"><span class="q-num">18.</span>Write a Singleton Event Bus with on/off/emit/once.</div>
+  <div class="a">
+<pre><code>class EventBus {
+  #listeners = new Map();
+  on(event, fn) {
+    if (!this.#listeners.has(event))
+      this.#listeners.set(event, new Set());
+    this.#listeners.get(event).add(fn);
+  }
+  off(event, fn) {
+    this.#listeners.get(event)?.delete(fn);
+  }
+  emit(event, data) {
+    this.#listeners.get(event)?.forEach(fn =&gt; fn(data));
+  }
+  once(event, fn) {
+    const wrap = d =&gt; { fn(d); this.off(event, wrap); };
+    this.on(event, wrap);
+  }
+}
+export default new EventBus();</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q19">
+  <div class="q"><span class="q-num">19.</span>Write the "killer" production API client Singleton.</div>
+  <div class="a">
+<pre><code>class ApiClient {
+  static #instance = null;
+  constructor(baseURL) {
+    if (ApiClient.#instance)
+      return ApiClient.#instance;
+    this.baseURL = baseURL;
+    this.token = null;
+    ApiClient.#instance = this;
+  }
+  setToken(token) { this.token = token; }
+  async request(path, options = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(this.token && {
+        Authorization: `Bearer ${this.token}`
+      }),
+      ...options.headers,
+    };
+    const res = await fetch(
+      `${this.baseURL}${path}`,
+      { ...options, headers }
+    );
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    return res.json();
+  }
+}
+export default new ApiClient('https://api.example.com');</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q20">
+  <div class="q"><span class="q-num">20.</span>Why use <code>static #instance</code> (private) in a class Singleton?</div>
+  <div class="a">
+    <ul>
+      <li><b>Tamper-proof</b> — can't be accessed or reassigned externally</li>
+      <li>Enforces encapsulation</li>
+      <li>Prevents accidental misuse from outside the class</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Tricky & Real-World</h2>
+
+<div class="qa" id="q21">
+  <div class="q"><span class="q-num">21.</span>How do you share a Singleton across browser tabs?</div>
+  <div class="a">
+    <p>Each tab is a separate JS realm. Options:</p>
+    <ul>
+      <li><b>localStorage + storage event</b> — simple, persists</li>
+      <li><b>BroadcastChannel</b> — modern, message-based</li>
+      <li><b>SharedWorker</b> — true cross-tab singleton</li>
+      <li>Server + WebSocket — for real apps</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q22">
+  <div class="q"><span class="q-num">22.</span>Why is module-level Singleton dangerous in Next.js SSR?</div>
+  <div class="a">
+    <p>Node <b>reuses modules across HTTP requests</b>. If your singleton holds user-specific state (current user, token), <b>request A's data leaks into request B</b>.</p>
+    <p><b>Fix</b>: don't store request-scoped state in a singleton; use <code>AsyncLocalStorage</code> or per-request context.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q23">
+  <div class="q"><span class="q-num">23.</span>How does HMR (Hot Module Replacement) affect Singletons?</div>
+  <div class="a">
+    <p>HMR can re-evaluate a module while the app runs, creating a <b>new singleton instance</b> while old references still point to the old one. Causes bugs only seen in dev. Use <code>module.hot.accept()</code> carefully.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q24">
+  <div class="q"><span class="q-num">24.</span>Can you break an ES Module Singleton?</div>
+  <div class="a">
+    <p>The pattern itself is solid, but real-world breakers:</p>
+    <ul>
+      <li><b>Bundler misconfiguration</b> — same package in two <code>node_modules</code> → two copies</li>
+      <li><b>Micro-frontends</b> — each bundles its own copy</li>
+      <li>Classic "two copies of React" error</li>
+    </ul>
+    <p><b>Fix</b>: webpack aliases, peer dependencies, or <code>window.__MY_SINGLETON__</code>.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q25">
+  <div class="q"><span class="q-num">25.</span>Can DevTools mutate a client-side Singleton?</div>
+  <div class="a">
+    <p><b>Yes.</b> Anything on the client is reachable. Never store secrets or trust the integrity of client-side singletons. Sensitive logic must be server-side.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q26">
+  <div class="q"><span class="q-num">26.</span>What happens to a userService Singleton on logout?</div>
+  <div class="a">
+    <p>Stale data lingers (cached user, tokens, in-flight requests). Must explicitly call <code>reset()</code> on logout. Subscribers/listeners must be cleaned up or you get memory leaks and "ghost" updates.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q27">
+  <div class="q"><span class="q-num">27.</span>Two micro-frontends bundle two copies of a Singleton — how to fix?</div>
+  <div class="a">
+    <ul>
+      <li><b>Module Federation</b> with <code>singleton: true, eager: true</code></li>
+      <li>Expose on window: <code>window.__MY_LIB__ = window.__MY_LIB__ || new MyLib()</code></li>
+      <li>Use peer dependencies + shared bundle</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q28">
+  <div class="q"><span class="q-num">28.</span>How to test a component that uses a Singleton API client?</div>
+  <div class="a">
+<pre><code>jest.mock('./apiClient', () =&gt; ({
+  default: {
+    request: jest.fn().mockResolvedValue({ id: 1 })
+  }
+}));</code></pre>
+    <p>Or refactor to dependency injection — pass the client via Context/props.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q29">
+  <div class="q"><span class="q-num">29.</span>How do you make Singleton-using code testable in React?</div>
+  <div class="a">
+    <p>Three techniques:</p>
+    <ol>
+      <li><b>Inject</b> via Context or props instead of importing directly</li>
+      <li><b>Mock the module</b>: <code>jest.mock('./apiClient')</code></li>
+      <li>Expose a <b>reset method</b>: <code>apiClient.__resetForTests()</code></li>
+    </ol>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q30">
+  <div class="q"><span class="q-num">30.</span>How to make a Singleton work across browser tabs (with code)?</div>
+  <div class="a">
+<pre><code>const channel = new BroadcastChannel('app');
+class AuthManager {
+  logout() {
+    this.user = null;
+    channel.postMessage({ type: 'logout' });
+  }
+  constructor() {
+    channel.onmessage = (e) =&gt; {
+      if (e.data.type === 'logout')
+        this.user = null;
+    };
+  }
+}</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>The <code>new</code> Keyword</h2>
+
+<div class="qa" id="q31">
+  <div class="q"><span class="q-num">31.</span>Core mental model: when does <code>new</code> work?</div>
+  <div class="a">
+    <p><b><code>new</code> only works on "blueprints" for creating objects.</b></p>
+    <ul>
+      <li>Class → ✅</li>
+      <li>Constructor function → ✅</li>
+      <li>Plain object with methods → ❌</li>
+    </ul>
+    <p>Quick check: <code>typeof X === "function"</code> → probably can use <code>new</code>.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q32">
+  <div class="q"><span class="q-num">32.</span>What does <code>typeof Math</code> return?</div>
+  <div class="a">
+    <p><code>"object"</code> → ❌ can't use <code>new Math()</code></p>
+    <p>Math is a plain namespace object, not a constructor.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q33">
+  <div class="q"><span class="q-num">33.</span>What does <code>typeof Array</code> return?</div>
+  <div class="a">
+    <p><code>"function"</code> → ✅ can use <code>new Array()</code></p>
+    <p>Array is a constructor.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q34">
+  <div class="q"><span class="q-num">34.</span>Which JS built-ins are "blueprints" (use <code>new</code>)?</div>
+  <div class="a">
+    <p><code>Array, Object, Date, Map, Set, Promise, Error, RegExp, WebSocket, FormData, XMLHttpRequest</code></p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q35">
+  <div class="q"><span class="q-num">35.</span>Which JS built-ins are "toolboxes" (don't use <code>new</code>)?</div>
+  <div class="a">
+    <p><code>Math, JSON, console, localStorage, window, document, Reflect, Intl</code></p>
+    <p>These are JS's built-in singletons!</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q36">
+  <div class="q"><span class="q-num">36.</span>Can arrow functions be used with <code>new</code>?</div>
+  <div class="a">
+    <p><b>No.</b></p>
+<pre><code>const Foo = () =&gt; {};
+new Foo();  // ❌ TypeError</code></pre>
+    <p>Arrow functions have no <code>[[Construct]]</code> internal method.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q37">
+  <div class="q"><span class="q-num">37.</span>Can <code>Symbol</code> and <code>BigInt</code> be used with <code>new</code>?</div>
+  <div class="a">
+    <p><b>No</b>, despite looking like constructors.</p>
+<pre><code>Symbol('id');      // ✅
+new Symbol('id');  // ❌ TypeError</code></pre>
+    <p>They are factory functions — call directly.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q38">
+  <div class="q"><span class="q-num">38.</span>What's the connection between "can't <code>new</code>" and Singletons?</div>
+  <div class="a">
+    <p>JS's built-in toolboxes (<code>Math, JSON, console</code>) are <b>language-enforced singletons</b>. The inability to <code>new</code> them <b>is</b> the singleton enforcement mechanism. Language designers made them plain objects specifically so you can't create more.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q39">
+  <div class="q"><span class="q-num">39.</span>Predict: <code>new Math()</code></div>
+  <div class="a">
+    <p>❌ <code>TypeError: Math is not a constructor</code></p>
+    <p>Math is a plain object (a toolbox), not a class/function.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q40">
+  <div class="q"><span class="q-num">40.</span>Predict: <code>new JSON()</code></div>
+  <div class="a">
+    <p>❌ <code>TypeError: JSON is not a constructor</code></p>
+    <p>JSON is a namespace object with parse/stringify methods.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Interview Answers</h2>
+
+<div class="qa" id="q41">
+  <div class="q"><span class="q-num">41.</span>The most idiomatic Singleton implementation in modern JS?</div>
+  <div class="a">
+    <p><b>ES Module export</b>:</p>
+<pre><code>class MyService { /* ... */ }
+export default new MyService();</code></pre>
+    <p>Module caching guarantees a single instance. No boilerplate needed.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q42">
+  <div class="q"><span class="q-num">42.</span>Interview answer: "Is Singleton an anti-pattern?"</div>
+  <div class="a">
+    <p>"Situational. For stateless infrastructure (loggers, API clients, WebSocket managers) it's pragmatic and clean. For app state, it becomes an anti-pattern — hidden globals, testing pain, bypasses framework reactivity. Modern React/Vue prefer Context, stores, or DI for state."</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q43">
+  <div class="q"><span class="q-num">43.</span>Interview answer: "Module vs Singleton pattern?"</div>
+  <div class="a">
+    <p>"ES modules are <b>implicitly</b> singletons — cached after first evaluation. The Singleton <i>pattern</i> adds explicit control: lazy init, private state via closures, enforcement of single instance. In most JS code, the module <b>is</b> the singleton."</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q44">
+  <div class="q"><span class="q-num">44.</span>Why does a class Singleton constructor return the existing instance?</div>
+  <div class="a">
+    <p>Handles the edge case where someone tries <code>new MyClass()</code> a second time. Without this, you'd get a fresh instance every time. With it: <code>new X() === new X()</code> is always <code>true</code>.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<hr>
+<p style="text-align: center; color: var(--text-soft); font-size: 0.9rem;">
+  End of document · <a href="#top" style="color: var(--accent);">Back to top ↑</a>
+</p>
+
+<script>
+  // Simple search filter
+  const search = document.getElementById('search');
+  const allQAs = document.querySelectorAll('.qa');
+  const allIndexItems = document.querySelectorAll('.index li');
+
+  search.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    allQAs.forEach(qa => {
+      const text = qa.textContent.toLowerCase();
+      qa.classList.toggle('hidden', term && !text.includes(term));
+    });
+    allIndexItems.forEach(li => {
+      const text = li.textContent.toLowerCase();
+      li.style.display = (term && !text.includes(term)) ? 'none' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
