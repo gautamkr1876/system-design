@@ -8,4 +8,5 @@ Hosted as a static site via GitHub Pages.
 
 - [Singleton Pattern](./singleton/) — Q&A reference
   Live: https://htmlpreview.github.io/?https://github.com/gautamkr1876/system-design/blob/main/singleton/index.html
-- [Observer Pattern](./observer/) — question bank (flashcards coming)
+- [Observer Pattern](./observer/) — Q&A reference
+  Live: https://htmlpreview.github.io/?https://github.com/gautamkr1876/system-design/blob/main/observer/index.html

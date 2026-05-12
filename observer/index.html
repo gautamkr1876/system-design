@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observer Pattern — Q&A Reference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text-soft: #555;
+    --border: #e5e5e5;
+    --accent: #0066cc;
+    --code-bg: #f4f4f4;
+    --highlight: #fff8e1;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: var(--text-soft);
+    margin-bottom: 2.5rem;
+    font-size: 1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin: 3rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  /* Mental model card */
+  .mental-model {
+    background: #fff8e1;
+    border-left: 4px solid #d4a373;
+    padding: 1.25rem 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2.5rem;
+  }
+  .mental-model-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8b6f47;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Index */
+  .index {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .index-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .index-section {
+    margin-bottom: 1.2rem;
+  }
+
+  .index-section-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+  }
+
+  .index ol {
+    list-style: none;
+    padding: 0;
+    counter-reset: q-counter;
+  }
+
+  .index li {
+    counter-increment: q-counter;
+    padding: 0.25rem 0;
+    line-height: 1.5;
+  }
+
+  .index li::before {
+    content: counter(q-counter) ".";
+    display: inline-block;
+    width: 2rem;
+    color: var(--text-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .index a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .index a:hover {
+    text-decoration: underline;
+  }
+
+  /* Questions */
+  .qa {
+    margin-bottom: 2.5rem;
+    padding-top: 1rem;
+    scroll-margin-top: 1rem;
+  }
+
+  .qa:target {
+    background: var(--highlight);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1rem 1rem 1.5rem;
+    margin-left: -1.5rem;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+
+  .q {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .q-num {
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 0.5rem;
+  }
+
+  .a {
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .a p { margin-bottom: 0.75rem; }
+  .a ul, .a ol { margin: 0.5rem 0 0.75rem 1.5rem; }
+  .a li { margin-bottom: 0.3rem; }
+
+  code {
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+
+  pre code {
+    background: none;
+    color: var(--text);
+    padding: 0;
+    font-size: 0.88rem;
+  }
+
+  strong, b { color: #000; }
+
+  /* Back to top */
+  .back-top {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .back-top:hover { text-decoration: underline; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* Search */
+  .search-wrap {
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 0.5rem 0;
+    z-index: 10;
+  }
+
+  #search {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+  }
+
+  #search:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .qa.hidden { display: none; }
+
+  @media (max-width: 600px) {
+    body { padding: 1rem 1rem 4rem; }
+    h1 { font-size: 1.6rem; }
+    .index { padding: 1rem 1.25rem; }
+  }
+</style>
+</head>
+<body id="top">
+
+<h1>Observer Pattern</h1>
+<p class="subtitle">JavaScript &amp; Frontend Interview Q&amp;A — click any question in the index to jump to its answer.</p>
+
+<div class="mental-model">
+  <div class="mental-model-title">🧠 Mental Model</div>
+  <p><b>Observer = YouTube channel.</b> The <b>subject</b> is the channel; it keeps the list of subscribers itself. When it uploads (state change), it pings every subscriber on the list directly — no middleman. Subscribers can hit <code>unsubscribe</code> (<code>.off</code> / <code>removeEventListener</code>) anytime.</p>
+  <p><b>Why it's not Pub/Sub:</b> Pub/Sub uses a broker (event bus) between publisher and subscriber, and neither knows the other exists. Observer is direct — the subject owns the subscriber list.</p>
+</div>
+
+<div class="search-wrap">
+  <input type="text" id="search" placeholder="🔍 Search questions...">
+</div>
+
+<!-- ============ INDEX ============ -->
+<nav class="index">
+  <div class="index-title">📚 Index</div>
+
+  <div class="index-section">
+    <div class="index-section-title">Conceptual</div>
+    <ol>
+      <li><a href="#q1">What is the Observer pattern? Name the two roles.</a></li>
+      <li><a href="#q2">What problem does it solve? Why not just call methods directly?</a></li>
+      <li><a href="#q3">Observer vs Pub/Sub vs Mediator — one-line differences</a></li>
+      <li><a href="#q4">Is Observer push-based or pull-based?</a></li>
+      <li><a href="#q5">Where does Observer show up natively in browser and Node?</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Implementation</div>
+    <ol start="6">
+      <li><a href="#q6">Implement <code>Subject</code> with subscribe / unsubscribe / notify</a></li>
+      <li><a href="#q7">Build a tiny <code>EventEmitter</code> with on / off / once / emit</a></li>
+      <li><a href="#q8">Add namespace / wildcard support (<code>user:*</code>)</a></li>
+      <li><a href="#q9">TypeScript-typed Observer with generics</a></li>
+      <li><a href="#q10">Implement a <code>Signal</code> / <code>Observable</code> primitive</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Tricky &amp; Gotchas</div>
+    <ol start="11">
+      <li><a href="#q11">Dangling subscriptions and memory leaks — causes &amp; fixes</a></li>
+      <li><a href="#q12">What if an observer throws inside <code>notify</code>?</a></li>
+      <li><a href="#q13">Mutation during iteration — subscribe/unsubscribe mid-notify</a></li>
+      <li><a href="#q14">Re-entrancy: observer triggers another emit</a></li>
+      <li><a href="#q15">Sync vs async notify — defaults and when to switch</a></li>
+      <li><a href="#q16">Why <code>WeakRef</code> / <code>WeakMap</code> in observer implementations?</a></li>
+      <li><a href="#q17">Why does <code>subject.off(() =&gt; {...})</code> never work?</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Real-World Scenarios</div>
+    <ol start="18">
+      <li><a href="#q18">Build a mini state store + <code>useSyncExternalStore</code></a></li>
+      <li><a href="#q19">Cross-component event bus in React — Observer or Pub/Sub?</a></li>
+      <li><a href="#q20">RAF-batched <code>ResizeObserver</code>-style wrapper</a></li>
+      <li><a href="#q21">Autosave system: editor → network + localStorage + UI</a></li>
+      <li><a href="#q22">Real-time stock ticker — data flow</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Follow-ups</div>
+    <ol start="23">
+      <li><a href="#q23">Now make it async — what changes?</a></li>
+      <li><a href="#q24">Scale to 10,000 observers — what breaks first?</a></li>
+      <li><a href="#q25">How do you unit-test a subject?</a></li>
+      <li><a href="#q26">Add priorities so some observers fire first</a></li>
+      <li><a href="#q27">Could RxJS replace this? When NOT to use RxJS?</a></li>
+    </ol>
+  </div>
+
+  <div class="index-section">
+    <div class="index-section-title">Anti-patterns</div>
+    <ol start="28">
+      <li><a href="#q28">Every DOM event into an app-wide observer — why bad</a></li>
+      <li><a href="#q29">Hand-rolling an EventEmitter inside React — what to use instead</a></li>
+      <li><a href="#q30">Subjects observing subjects — when chains become anti-patterns</a></li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ============ QUESTIONS & ANSWERS ============ -->
+
+<h2>Conceptual</h2>
+
+<div class="qa" id="q1">
+  <div class="q"><span class="q-num">1.</span>What is the Observer pattern? Name the two roles.</div>
+  <div class="a">
+    <p>A <b>behavioral design pattern</b> where one object (the <b>Subject</b> / <b>Observable</b>) keeps a list of dependents and notifies them automatically when its state changes.</p>
+    <ul>
+      <li><b>Subject</b> — owns the subscriber list; exposes <code>subscribe</code>, <code>unsubscribe</code>, <code>notify</code></li>
+      <li><b>Observer</b> — a function or object with an <code>update</code> method that reacts to the notification</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q2">
+  <div class="q"><span class="q-num">2.</span>What problem does it solve? Why not just call methods directly?</div>
+  <div class="a">
+    <p><b>Decoupling.</b> The subject doesn't know who its observers are at design time — they register at runtime. Without it, every new reaction means editing the subject (violates open/closed principle).</p>
+    <p>Same principle as event delegation, applied to objects: one source, many independent reactions, added/removed without touching the source.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q3">
+  <div class="q"><span class="q-num">3.</span>Observer vs Pub/Sub vs Mediator — one-line differences.</div>
+  <div class="a">
+    <ul>
+      <li><b>Observer</b>: subject owns the subscriber list. Direct, usually synchronous. One-to-many.</li>
+      <li><b>Pub/Sub</b>: a <b>broker</b> (event bus) sits between publisher and subscriber; neither knows the other. Usually async. Many-to-many.</li>
+      <li><b>Mediator</b>: a central coordinator that knows <b>all</b> parties and routes messages between them. Many-to-many through a hub. Used for complex UI workflows (wizard, form orchestration).</li>
+    </ul>
+    <p><b>Memory trigger:</b> Observer = direct line, Pub/Sub = bulletin board, Mediator = air traffic control.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q4">
+  <div class="q"><span class="q-num">4.</span>Is Observer push-based or pull-based?</div>
+  <div class="a">
+    <p><b>Default is push</b> — subject sends data to observers when notifying.</p>
+    <p><b>Pull</b> = subject only signals "something changed" and each observer queries for the slice it cares about. Useful when different observers want different parts of the state. Zustand's selector subscriptions are pull-style; RxJS supports both via operators.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q5">
+  <div class="q"><span class="q-num">5.</span>Where does Observer show up natively in browser and Node?</div>
+  <div class="a">
+    <p><b>Browser:</b></p>
+    <ul>
+      <li><code>EventTarget.addEventListener</code> — DOM events</li>
+      <li><code>MutationObserver</code>, <code>IntersectionObserver</code>, <code>ResizeObserver</code>, <code>PerformanceObserver</code></li>
+    </ul>
+    <p><b>Node:</b></p>
+    <ul>
+      <li><code>EventEmitter</code> (<code>.on</code>, <code>.emit</code>, <code>.off</code>) — used by streams, HTTP server, process</li>
+    </ul>
+    <p>Both are textbook Observer — the subject keeps its own listener list.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Implementation</h2>
+
+<div class="qa" id="q6">
+  <div class="q"><span class="q-num">6.</span>Implement <code>Subject</code> with subscribe / unsubscribe / notify.</div>
+  <div class="a">
+<pre><code>class Subject {
+  #observers = new Set();
+
+  subscribe(fn) {
+    this.#observers.add(fn);
+    return () =&gt; this.#observers.delete(fn);
+  }
+
+  notify(data) {
+    for (const fn of [...this.#observers]) fn(data);
+  }
+}</code></pre>
+    <p><b>Key idea:</b> <code>subscribe</code> returns the unsubscribe function. The caller never has to remember the original reference. Snapshot with <code>[...]</code> before iterating to avoid mutation-during-iteration bugs.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q7">
+  <div class="q"><span class="q-num">7.</span>Build a tiny <code>EventEmitter</code> with on / off / once / emit.</div>
+  <div class="a">
+<pre><code>class EventEmitter {
+  #handlers = new Map();
+
+  on(event, fn) {
+    if (!this.#handlers.has(event))
+      this.#handlers.set(event, new Set());
+    this.#handlers.get(event).add(fn);
+    return () =&gt; this.off(event, fn);
+  }
+
+  off(event, fn) {
+    this.#handlers.get(event)?.delete(fn);
+  }
+
+  once(event, fn) {
+    const wrap = (...args) =&gt; {
+      this.off(event, wrap);
+      fn(...args);
+    };
+    return this.on(event, wrap);
+  }
+
+  emit(event, ...args) {
+    for (const fn of [...this.#handlers.get(event) ?? []])
+      fn(...args);
+  }
+}</code></pre>
+    <p>FAANG favorite. Note: <code>off(event, wrap)</code> inside <code>once</code> uses the wrapper's identity — not <code>fn</code> — so it actually removes itself.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q8">
+  <div class="q"><span class="q-num">8.</span>Add namespace / wildcard support.</div>
+  <div class="a">
+<pre><code>emit(event, ...args) {
+  // 'user:login' fires 'user:login', 'user:*', and '*'
+  const parts = event.split(':');
+  for (let i = parts.length; i &gt; 0; i--) {
+    const exact = parts.slice(0, i).join(':');
+    const wild  = exact + ':*';
+    for (const fn of [...this.#handlers.get(exact) ?? []])
+      fn(event, ...args);
+    for (const fn of [...this.#handlers.get(wild)  ?? []])
+      fn(event, ...args);
+  }
+  for (const fn of [...this.#handlers.get('*') ?? []])
+    fn(event, ...args);
+}</code></pre>
+    <p>Pass the original event name as the first arg so wildcard handlers know what fired.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q9">
+  <div class="q"><span class="q-num">9.</span>TypeScript-typed Observer with generics.</div>
+  <div class="a">
+<pre><code>type Listener&lt;T&gt; = (data: T) =&gt; void;
+
+class Subject&lt;T&gt; {
+  private observers = new Set&lt;Listener&lt;T&gt;&gt;();
+
+  subscribe(fn: Listener&lt;T&gt;): () =&gt; void {
+    this.observers.add(fn);
+    return () =&gt; this.observers.delete(fn);
+  }
+
+  notify(data: T): void {
+    for (const fn of [...this.observers]) fn(data);
+  }
+}
+
+const userEvents = new Subject&lt;{ id: number; name: string }&gt;();
+userEvents.subscribe(u =&gt; console.log(u.name));  // typed!</code></pre>
+    <p>For multi-event emitters use a discriminated union or a <code>Record&lt;EventName, Payload&gt;</code> type.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q10">
+  <div class="q"><span class="q-num">10.</span>Implement a <code>Signal</code> / <code>Observable</code> primitive.</div>
+  <div class="a">
+<pre><code>function createSignal(initial) {
+  let value = initial;
+  const subs = new Set();
+
+  return {
+    get: () =&gt; value,
+    set: (next) =&gt; {
+      if (Object.is(value, next)) return;  // skip noop
+      value = next;
+      for (const fn of [...subs]) fn(value);
+    },
+    subscribe: (fn) =&gt; {
+      subs.add(fn);
+      return () =&gt; subs.delete(fn);
+    },
+  };
+}
+
+const count = createSignal(0);
+count.subscribe(v =&gt; console.log('count is', v));
+count.set(1);  // logs "count is 1"</code></pre>
+    <p>This is the Observer pattern at the heart of Solid/Preact signals. Real implementations add a <b>reactive graph</b> to auto-track which signals a computation reads.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Tricky &amp; Gotchas</h2>
+
+<div class="qa" id="q11">
+  <div class="q"><span class="q-num">11.</span>Dangling subscriptions &amp; memory leaks — causes &amp; fixes.</div>
+  <div class="a">
+    <p><b>Cause:</b> observer never removed; its closure pins component/view in memory → GC can't collect.</p>
+    <p><b>Fixes:</b></p>
+    <ul>
+      <li>Always return an unsubscribe from <code>subscribe</code>; call it in cleanup</li>
+      <li>In React: <code>useEffect(() =&gt; { const off = sub.subscribe(...); return off; }, [])</code></li>
+      <li>For native EventTargets: <code>addEventListener('x', fn, { signal: abortCtrl.signal })</code> auto-removes on abort</li>
+      <li>Advanced: <code>WeakRef</code> + <code>FinalizationRegistry</code> for fire-and-forget references</li>
+    </ul>
+    <p><b>Memory trigger:</b> if you subscribe, you owe an unsubscribe.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q12">
+  <div class="q"><span class="q-num">12.</span>What if an observer throws inside <code>notify</code>?</div>
+  <div class="a">
+    <p>The default <code>for…of</code> loop aborts on throw → remaining observers are <b>skipped</b>. One bad listener silences the rest.</p>
+<pre><code>notify(data) {
+  for (const fn of [...this.#observers]) {
+    try { fn(data); }
+    catch (e) { queueMicrotask(() =&gt; { throw e; }); }
+  }
+}</code></pre>
+    <p>Wrap each call. Re-throw via microtask so errors still reach <code>window.onerror</code> but don't break the loop. This is what Node's <code>EventEmitter</code> does NOT do — uncaught throws there really do crash the process.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q13">
+  <div class="q"><span class="q-num">13.</span>Mutation during iteration — subscribe / unsubscribe mid-notify.</div>
+  <div class="a">
+    <p>If observer A's callback calls <code>subscribe</code> or <code>unsubscribe</code> on the same subject, you'll skip or double-fire others.</p>
+    <p><b>Fix:</b> snapshot the list before iterating.</p>
+<pre><code>for (const fn of [...this.#observers]) fn(data);</code></pre>
+    <p>Trade-off: observers added <i>during</i> this notify won't see this event. That's intentional and matches DOM <code>addEventListener</code> semantics.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q14">
+  <div class="q"><span class="q-num">14.</span>Re-entrancy: observer A triggers another emit that calls A again.</div>
+  <div class="a">
+    <p>Can become infinite recursion or stack overflow. Guards:</p>
+    <ul>
+      <li><b>Queue</b> — if already notifying, push onto a pending queue and drain after</li>
+      <li><b>Depth counter</b> with a cap (throw or warn at depth &gt; 100)</li>
+      <li><b>Microtask defer</b> — <code>queueMicrotask(() =&gt; this._actuallyNotify(data))</code> so the current stack unwinds first</li>
+    </ul>
+    <p>RxJS uses a scheduler abstraction to make this configurable.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q15">
+  <div class="q"><span class="q-num">15.</span>Sync vs async notify — defaults and when to switch.</div>
+  <div class="a">
+    <p><b>Default is sync:</b> <code>addEventListener</code>, <code>EventEmitter</code>, most hand-rolled subjects call handlers immediately in subscription order.</p>
+    <p><b>Go async when:</b></p>
+    <ul>
+      <li>Subject is on a hot path — don't block the emitter on slow handlers</li>
+      <li>Avoiding re-entrancy (microtask defer)</li>
+      <li>Bursty events (debounce / RAF batch — scroll, resize, input)</li>
+      <li>Handlers themselves are async and you need <code>Promise.allSettled</code></li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q16">
+  <div class="q"><span class="q-num">16.</span>Why <code>WeakRef</code> / <code>WeakMap</code> in observer implementations?</div>
+  <div class="a">
+    <p>To prevent the subject from keeping its observers alive forever. With <code>WeakRef</code>, the subject holds a weak handle — when nothing else references the observer, GC can collect it.</p>
+    <p><b>Trade-offs:</b></p>
+    <ul>
+      <li>Non-deterministic — you don't control <i>when</i> GC fires</li>
+      <li><code>FinalizationRegistry</code> callbacks are best-effort, not guaranteed</li>
+      <li>Hard to test and debug</li>
+    </ul>
+    <p>Most production code prefers <b>explicit unsubscribe</b> + linters that flag missing cleanups.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q17">
+  <div class="q"><span class="q-num">17.</span>Why does <code>subject.off(() =&gt; {...})</code> never work?</div>
+  <div class="a">
+    <p>The arrow at the call site is a <b>brand-new function reference</b> — not the one you passed to <code>on</code>. <code>Set</code>/<code>Map</code> use <code>===</code> identity, so deletion silently fails.</p>
+<pre><code>// ❌ Never matches
+emitter.on('x', () =&gt; doThing());
+emitter.off('x', () =&gt; doThing());
+
+// ✅ Keep the reference
+const handler = () =&gt; doThing();
+emitter.on('x', handler);
+emitter.off('x', handler);
+
+// ✅ Better: return unsubscribe from on()
+const off = emitter.on('x', () =&gt; doThing());
+off();</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Real-World Scenarios</h2>
+
+<div class="qa" id="q18">
+  <div class="q"><span class="q-num">18.</span>Build a mini state store + <code>useSyncExternalStore</code>.</div>
+  <div class="a">
+<pre><code>function createStore(initial) {
+  let state = initial;
+  const subs = new Set();
+  return {
+    getState: () =&gt; state,
+    setState: (next) =&gt; {
+      state = typeof next === 'function' ? next(state) : next;
+      for (const fn of [...subs]) fn();
+    },
+    subscribe: (fn) =&gt; {
+      subs.add(fn);
+      return () =&gt; subs.delete(fn);
+    },
+  };
+}
+
+// In a React component:
+const store = createStore({ count: 0 });
+function Counter() {
+  const state = useSyncExternalStore(store.subscribe, store.getState);
+  return &lt;button onClick={() =&gt; store.setState(s =&gt; ({ count: s.count + 1 }))}&gt;
+    {state.count}
+  &lt;/button&gt;;
+}</code></pre>
+    <p><code>useSyncExternalStore</code> is React's official bridge to Observer-based stores. It fixes <b>tearing</b> during concurrent rendering — something hand-rolled <code>useState</code> + subscribe can't do.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q19">
+  <div class="q"><span class="q-num">19.</span>Cross-component event bus in React — Observer or Pub/Sub?</div>
+  <div class="a">
+    <p><b>Honest answer: usually neither.</b> Prefer Context, Zustand, Jotai, or React Query for shared state — they integrate with React's render model.</p>
+    <p><b>Pub/Sub wins when:</b> truly fire-and-forget broadcasts where no natural "subject" owns the list (toast notifications triggered from anywhere, telemetry events).</p>
+    <p><b>Typed mini Pub/Sub:</b></p>
+<pre><code>type Events = { toast: { msg: string }; route: { to: string } };
+class TypedBus {
+  #h = new Map();
+  on&lt;K extends keyof Events&gt;(k: K, fn: (e: Events[K]) =&gt; void) { /* ... */ }
+  emit&lt;K extends keyof Events&gt;(k: K, e: Events[K]) { /* ... */ }
+}</code></pre>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q20">
+  <div class="q"><span class="q-num">20.</span>RAF-batched <code>ResizeObserver</code>-style wrapper.</div>
+  <div class="a">
+<pre><code>class BatchedSubject {
+  #observers = new Set();
+  #scheduled = false;
+  #latest;
+
+  subscribe(fn) {
+    this.#observers.add(fn);
+    return () =&gt; this.#observers.delete(fn);
+  }
+
+  notify(data) {
+    this.#latest = data;
+    if (this.#scheduled) return;
+    this.#scheduled = true;
+    requestAnimationFrame(() =&gt; {
+      this.#scheduled = false;
+      for (const fn of [...this.#observers]) fn(this.#latest);
+    });
+  }
+}</code></pre>
+    <p>Coalesces a burst into one frame. This is what native DOM observers do — fire at most once per animation frame, with the latest value.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q21">
+  <div class="q"><span class="q-num">21.</span>Autosave: editor → network + localStorage + UI status.</div>
+  <div class="a">
+    <p>Editor is the subject; three independent observers. <b>Isolate failures</b> so a flaky network doesn't kill the local-storage save:</p>
+<pre><code>async notify(data) {
+  const tasks = [...this.#observers].map(fn =&gt;
+    Promise.resolve().then(() =&gt; fn(data))
+  );
+  const results = await Promise.allSettled(tasks);
+  results.forEach(r =&gt; {
+    if (r.status === 'rejected')
+      this.emit('save:failed', r.reason);
+  });
+}</code></pre>
+    <p>Then a UI-status observer subscribes to <code>save:failed</code> to show "offline, retrying…".</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q22">
+  <div class="q"><span class="q-num">22.</span>Real-time stock ticker — data flow.</div>
+  <div class="a">
+    <ol>
+      <li>WebSocket (data source) — owns reconnect/backoff logic</li>
+      <li><code>TickerSubject</code> — receives messages, calls <code>notify(tick)</code></li>
+      <li>React UI subscribes via <code>useSyncExternalStore</code> → re-renders only the price cells</li>
+    </ol>
+    <p><b>Performance tricks:</b></p>
+    <ul>
+      <li>RAF-batch ticks — don't render faster than 60fps</li>
+      <li>Use selector subscriptions so each row only re-renders if <i>its</i> symbol changed</li>
+      <li>Disconnect/reconnect logic on the subject, not on each consumer</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Follow-ups</h2>
+
+<div class="qa" id="q23">
+  <div class="q"><span class="q-num">23.</span>Now make it async — what changes?</div>
+  <div class="a">
+    <p>Wrap notify in <code>queueMicrotask</code> (microtask = after current stack, before next paint) or <code>setTimeout(0)</code> (macrotask = after next paint).</p>
+<pre><code>notify(data) {
+  queueMicrotask(() =&gt; {
+    for (const fn of [...this.#observers]) fn(data);
+  });
+}</code></pre>
+    <p>If observers themselves are async and you need to await them, use <code>Promise.all</code> / <code>Promise.allSettled</code> over the result of each call.</p>
+    <p><b>Connect back:</b> same trade-off as Promise vs setTimeout — microtask runs sooner but starves the event loop if you spam them.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q24">
+  <div class="q"><span class="q-num">24.</span>Scale to 10,000 observers — what breaks first?</div>
+  <div class="a">
+    <p><b>Notify is O(n).</b> But the loop itself is rarely the bottleneck — usually <b>one heavy observer</b> dominates. Profile first.</p>
+    <p><b>Mitigations:</b></p>
+    <ul>
+      <li><b>Selector subscriptions</b> — observers fire only when their slice changes (Zustand pattern)</li>
+      <li><b>Bucket by event type</b> — <code>Map&lt;event, Set&lt;fn&gt;&gt;</code> so only relevant observers wake</li>
+      <li><b>Batch</b> via RAF or microtask — collapse bursts</li>
+      <li><b>Remove dead observers</b> — leaks compound at this scale; WeakRef + FinalizationRegistry as last resort</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q25">
+  <div class="q"><span class="q-num">25.</span>How do you unit-test a subject?</div>
+  <div class="a">
+<pre><code>test('notifies subscribers and respects unsubscribe', () =&gt; {
+  const sub = new Subject();
+  const fn = vi.fn();
+  const off = sub.subscribe(fn);
+
+  sub.notify(42);
+  expect(fn).toHaveBeenCalledWith(42);
+
+  off();
+  sub.notify(43);
+  expect(fn).toHaveBeenCalledTimes(1);  // unsubscribed
+});</code></pre>
+    <p>Always test: (1) subscribers fire, (2) order is stable, (3) unsubscribe actually unsubscribes, (4) a throwing observer doesn't kill the rest.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q26">
+  <div class="q"><span class="q-num">26.</span>Add priorities so some observers fire first.</div>
+  <div class="a">
+<pre><code>subscribe(fn, priority = 0) {
+  this.#observers.push({ fn, priority });
+  this.#observers.sort((a, b) =&gt; b.priority - a.priority);
+  return () =&gt; {
+    this.#observers = this.#observers.filter(o =&gt; o.fn !== fn);
+  };
+}</code></pre>
+    <p><b>Trade-off:</b> priorities encourage hidden coupling — "observer X must run before Y." Often a design smell; consider splitting into two sequential subjects (<code>before:save</code> → <code>after:save</code>) instead.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q27">
+  <div class="q"><span class="q-num">27.</span>Could RxJS replace this? When NOT to use RxJS?</div>
+  <div class="a">
+    <p><b>RxJS gives you:</b> Observer + operators (<code>map</code>, <code>filter</code>, <code>debounce</code>, <code>switchMap</code>, <code>retry</code>) + first-class cancellation via <code>Subscription</code>.</p>
+    <p><b>Reach for it when:</b> you have <i>streams</i> — async sequences that need composition (search-as-you-type, drag/drop, complex form validation).</p>
+    <p><b>Skip when:</b></p>
+    <ul>
+      <li>One-shot subscriptions or simple sync events</li>
+      <li>Bundle size matters (RxJS is ~40KB)</li>
+      <li>Team unfamiliar with reactive style — steep learning curve</li>
+      <li>You already have <code>useEffect</code> + AbortController doing the job in 5 lines</li>
+    </ul>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<h2>Anti-patterns</h2>
+
+<div class="qa" id="q28">
+  <div class="q"><span class="q-num">28.</span>Every DOM event into an app-wide observer — why bad.</div>
+  <div class="a">
+    <ul>
+      <li><b>Hidden control flow</b> — "who fired this?" becomes impossible to trace</li>
+      <li><b>No type safety</b> — string event names are typo-prone</li>
+      <li><b>Memory leaks compound</b> — one missed unsubscribe per feature × 50 features</li>
+      <li><b>Tight coupling masquerading as decoupling</b> — every consumer still depends on event-name strings</li>
+    </ul>
+    <p><b>Rule:</b> use the smallest scope that works. Local state → Context → scoped store → global bus. Only escalate when the smaller scope genuinely fails.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q29">
+  <div class="q"><span class="q-num">29.</span>Hand-rolling an EventEmitter inside React — what to use instead.</div>
+  <div class="a">
+    <p><b>The problem:</b> a hand-rolled emitter bypasses React's render model. State changes don't trigger re-renders; in concurrent rendering you get <b>tearing</b> (some components see old state, others see new).</p>
+    <p><b>What to reach for:</b></p>
+    <ul>
+      <li><code>useState</code> / <code>useReducer</code> — local state</li>
+      <li><b>Context</b> — shared state, fine for low-frequency updates</li>
+      <li><b>Zustand / Jotai</b> — observer-based stores done right</li>
+      <li><code>useSyncExternalStore</code> — bridge to your own external store</li>
+    </ul>
+    <p>Hand-roll only when bridging something React doesn't own: DOM events, WebSocket streams, third-party SDK callbacks.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<div class="qa" id="q30">
+  <div class="q"><span class="q-num">30.</span>Subjects observing subjects — when chains become anti-patterns.</div>
+  <div class="a">
+    <p>A → notifies → B → notifies → C → notifies → A. Now you have a cycle, surprising re-fires, and stack overflows. Debugging is brutal because logs interleave.</p>
+    <p><b>Fix:</b> single source of truth + <b>derived</b> state.</p>
+    <ul>
+      <li>Solid/Preact <b>signals</b> auto-derive without manual subscribe chains</li>
+      <li>Zustand <b>selectors</b> derive from the store; no inter-subject chains</li>
+      <li>Same principle as React's rule: <i>don't compute state from state with useEffect</i></li>
+    </ul>
+    <p><b>Memory trigger:</b> if you find yourself writing <code>A.subscribe(() =&gt; B.notify(...))</code>, you're building a Rube Goldberg machine. Use derivation, not propagation.</p>
+  </div>
+  <a href="#top" class="back-top">↑ Back to top</a>
+</div>
+
+<hr>
+<p style="text-align: center; color: var(--text-soft); font-size: 0.9rem;">
+  End of document · <a href="#top" style="color: var(--accent);">Back to top ↑</a>
+</p>
+
+<script>
+  // Simple search filter
+  const search = document.getElementById('search');
+  const allQAs = document.querySelectorAll('.qa');
+  const allIndexItems = document.querySelectorAll('.index li');
+
+  search.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    allQAs.forEach(qa => {
+      const text = qa.textContent.toLowerCase();
+      qa.classList.toggle('hidden', term && !text.includes(term));
+    });
+    allIndexItems.forEach(li => {
+      const text = li.textContent.toLowerCase();
+      li.style.display = (term && !text.includes(term)) ? 'none' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
