@@ -27,7 +27,6 @@ No setup needed — the link above renders `index.html` directly from this repo.
 |------|---------|
 | `index.html` | The Q&A page |
 | `README.md` | This file |
-| `GITHUB-DEPLOY-GUIDE.md` | Optional: full GitHub Pages walkthrough if you ever want a custom URL |
 
 ---
 
