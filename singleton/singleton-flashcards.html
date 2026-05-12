@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Singleton Pattern · Study Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e0f;
+    --bg-elevated: #16181a;
+    --bg-card: #1c1f22;
+    --border: #2a2d31;
+    --border-hover: #3d4147;
+    --text: #e8e6e3;
+    --text-dim: #8a8680;
+    --text-mute: #5c5854;
+    --accent: #d4a373;
+    --accent-bright: #f4c997;
+    --accent-soft: rgba(212, 163, 115, 0.12);
+    --success: #7ba05b;
+    --danger: #c75c5c;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(212, 163, 115, 0.04) 0%, transparent 50%),
+      radial-gradient(at 80% 100%, rgba(212, 163, 115, 0.03) 0%, transparent 50%);
+  }
+
+  /* ============ HEADER ============ */
+  .header {
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .header::before {
+    content: "STUDY · REVISE · MASTER";
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .title em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    max-width: 540px;
+    margin: 1rem auto 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+
+  /* ============ STATS ============ */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-top: 0.4rem;
+  }
+
+  /* ============ CONTROLS ============ */
+  .controls {
+    max-width: 1200px;
+    margin: 3rem auto 2rem;
+    padding: 0 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 1rem 0.85rem 2.5rem;
+    border-radius: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .search-box::before {
+    content: "⌕";
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-mute);
+    font-size: 1.1rem;
+  }
+
+  .filter-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.5rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .chip.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+
+  .action-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.5rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ============ CARDS GRID ============ */
+  .cards-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem 6rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 180px;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .card.flipped {
+    border-color: var(--accent);
+    background: var(--bg-elevated);
+  }
+
+  .card.known {
+    border-left: 3px solid var(--success);
+  }
+
+  .card.review {
+    border-left: 3px solid var(--danger);
+  }
+
+  .card-header {
+    padding: 1rem 1.25rem 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-mute);
+    letter-spacing: 0.15em;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 0.15rem 0.5rem;
+    letter-spacing: 0.05em;
+    text-transform: lowercase;
+  }
+
+  .card-body {
+    padding: 0.5rem 1.25rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-question {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-question code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95em;
+    background: var(--bg);
+    padding: 0.05em 0.35em;
+    color: var(--accent-bright);
+    border-radius: 2px;
+  }
+
+  .card-answer {
+    display: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin-top: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .card.flipped .card-answer {
+    display: block;
+  }
+
+  .card-answer code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: var(--bg);
+    padding: 0.1em 0.4em;
+    color: var(--accent-bright);
+    border-radius: 2px;
+  }
+
+  .card-answer pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.85rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    border-radius: 3px;
+  }
+
+  .card-answer pre code {
+    background: transparent;
+    padding: 0;
+    color: var(--text);
+  }
+
+  .card-answer b {
+    color: var(--accent-bright);
+    font-weight: 600;
+  }
+
+  .card-answer ul, .card-answer ol {
+    padding-left: 1.25rem;
+    margin: 0.5rem 0;
+  }
+
+  .card-answer li {
+    margin-bottom: 0.25rem;
+  }
+
+  .card-hint {
+    margin-top: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-mute);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding-top: 0.75rem;
+  }
+
+  .card.flipped .card-hint {
+    display: none;
+  }
+
+  .card-actions {
+    display: none;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .card.flipped .card-actions {
+    display: flex;
+  }
+
+  .mark-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .mark-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .mark-btn.known {
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  .mark-btn.review {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ EMPTY STATE ============ */
+  .empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-mute);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    grid-column: 1 / -1;
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+  }
+
+  .footer span { color: var(--accent); }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 640px) {
+    .header { padding: 3rem 1.5rem 2rem; }
+    .controls { padding: 0 1rem; }
+    .cards-container { padding: 1rem 1rem 4rem; grid-template-columns: 1fr; }
+    .stats { gap: 1.5rem; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1 class="title">The Singleton <em>Codex</em></h1>
+  <p class="subtitle">Fifty cards on the most-asked frontend design pattern. Tap a card to reveal the answer.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num" id="stat-total">50</span>
+      <span class="stat-label">Total Cards</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-known">0</span>
+      <span class="stat-label">Mastered</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-review">0</span>
+      <span class="stat-label">To Review</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="stat-progress">0%</span>
+      <span class="stat-label">Progress</span>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search cards...">
+  </div>
+  <div class="filter-chips" id="filters">
+    <button class="chip active" data-filter="all">All</button>
+    <button class="chip" data-filter="concept">Concept</button>
+    <button class="chip" data-filter="implementation">Implementation</button>
+    <button class="chip" data-filter="react">React</button>
+    <button class="chip" data-filter="ssr">SSR</button>
+    <button class="chip" data-filter="testing">Testing</button>
+    <button class="chip" data-filter="new-keyword">new keyword</button>
+    <button class="chip" data-filter="interview-answer">Interview</button>
+    <button class="chip" data-filter="review">⚠ To Review</button>
+  </div>
+  <button class="action-btn" id="shuffle-btn">⇄ Shuffle</button>
+  <button class="action-btn" id="reset-btn">↺ Reset</button>
+</div>
+
+<main class="cards-container" id="cards-container"></main>
+
+<footer class="footer">
+  Built for <span>focused study</span> · Progress saved locally
+</footer>
+
+<script>
+const cards = [
+  { q: "What is the Singleton pattern in JavaScript?", a: "A design pattern that restricts a class/object to a <b>single instance</b> and provides a global access point to it. In JS, typically implemented via modules, closures, or classes with a static instance reference.", tags: ["concept"] },
+  { q: "Why is Singleton \"natural\" in JavaScript?", a: "Because <b>ES modules are cached after first import</b>. Every <code>import</code> returns the same instance — so <code>export default new Service()</code> is automatically a singleton with no extra boilerplate.", tags: ["concept"] },
+  { q: "Difference between a Singleton and <code>const obj = {}</code>?", a: "Both give one shared instance, but Singleton pattern adds:<ul><li><b>Lazy initialization</b></li><li><b>Controlled access</b></li><li><b>Private state via closures</b></li><li>Enforcement that <code>new</code> returns the same instance</li></ul>Object literal is eagerly created and fully public.", tags: ["concept"] },
+  { q: "Is <code>Math</code> a Singleton?", a: "<b>Yes.</b> Built-in object created once at runtime. No constructor (<code>new Math()</code> throws TypeError). One shared toolbox for all math operations across the entire program.", tags: ["concept", "new-keyword"] },
+  { q: "Is <code>window</code> a Singleton?", a: "<b>Yes</b> — single global object per browser tab. Every script in the tab sees the same <code>window</code>. Each tab/iframe has its own, so technically \"singleton per browsing context.\"", tags: ["concept"] },
+  { q: "Is <code>console</code> a Singleton?", a: "<b>Yes.</b> One shared logging object. In fact, <code>console === window.console</code>.", tags: ["concept"] },
+  { q: "The two-question mental test for \"is this a Singleton?\"", a: "<ol><li>Is there exactly <b>one of it</b> in my program?</li><li>Can <b>everyone access the same one</b>?</li></ol>If both = yes → Singleton.", tags: ["concept"] },
+  { q: "Name 5 real frontend uses of Singleton.", a: "<ul><li>Logger</li><li>API/HTTP client</li><li>WebSocket connection</li><li>Event bus / PubSub</li><li>Theme manager</li></ul>Others: Analytics tracker, Router, Redux/Zustand store, IndexedDB wrapper, Feature flags.", tags: ["concept"] },
+  { q: "Name 3 downsides of Singletons in React/Vue apps.", a: "<ul><li><b>Hidden global state</b> → hard to reason about</li><li><b>Tight coupling</b> → components depend directly, not via props</li><li><b>Testing pain</b> → must mock the module</li><li><b>SSR state leaks</b> between requests</li><li><b>No re-renders</b> when state changes</li></ul>", tags: ["concept", "react"] },
+  { q: "Singleton vs React Context — when to use which?", a: "<b>Singleton</b>: app-wide service that doesn't need to trigger re-renders (logger, API client, analytics).<br><br><b>Context</b>: shared state components must <b>react to</b> (theme, auth user, locale). Causes re-renders.<br><br><b>Best pattern</b>: Singleton holds the logic; Context exposes a reactive slice.", tags: ["react"] },
+  { q: "Are Redux/Zustand stores singletons?", a: "<b>Yes.</b> Redux: one <code>store</code> created and passed via Provider. Zustand: <code>create()</code> returns a hook tied to one store per module — pure module-singleton pattern.", tags: ["react"] },
+  { q: "Write a Singleton using closure (IIFE).", a: "<pre><code>const Singleton = (function () {\n  let instance;\n  return {\n    getInstance() {\n      if (!instance) instance = { data: [] };\n      return instance;\n    }\n  };\n})();</code></pre>The closure hides <code>instance</code> — can't be accessed or reassigned externally. Lazy by default.", tags: ["implementation"] },
+  { q: "Write a Singleton using an ES6 class with private static field.", a: "<pre><code>class Logger {\n  static #instance = null;\n  constructor() {\n    if (Logger.#instance) return Logger.#instance;\n    Logger.#instance = this;\n    this.logs = [];\n  }\n}</code></pre>The trick: constructor returns the existing instance if one exists. <code>new Logger() === new Logger()</code> is <code>true</code>.", tags: ["implementation"] },
+  { q: "Write a Singleton using an ES Module (the modern way).", a: "<pre><code>// logger.js\nclass Logger { /* ... */ }\nexport default new Logger();</code></pre>Modules are cached, so every <code>import logger from './logger'</code> gets the same instance. Most idiomatic JS singleton.", tags: ["implementation"] },
+  { q: "Why use <code>Object.freeze()</code> on a Singleton?", a: "To make it <b>immutable</b> — prevents accidental or malicious mutation.<pre><code>const Config = Object.freeze({\n  apiUrl: '...',\n  timeout: 5000\n});\nConfig.apiUrl = 'hacked'; // silently fails</code></pre>", tags: ["implementation"] },
+  { q: "What's the limit of <code>Object.freeze()</code>?", a: "<b>It's shallow.</b> Nested objects are still mutable.<pre><code>const o = Object.freeze({ a: { b: 1 } });\no.a = 2;     // ❌ fails\no.a.b = 99;  // ✅ succeeds!</code></pre>For full immutability use a deep-freeze utility.", tags: ["implementation"] },
+  { q: "Write a lazy Singleton using a getter.", a: "<pre><code>const Service = {\n  _instance: null,\n  get instance() {\n    if (!this._instance)\n      this._instance = new ExpensiveThing();\n    return this._instance;\n  }\n};</code></pre>Useful when construction is expensive.", tags: ["implementation"] },
+  { q: "Does JavaScript need thread-safety for Singletons?", a: "<b>No</b> for the main thread — JS is single-threaded with an event loop. No <code>volatile</code>, no double-checked locking needed.<br><br><b>But</b> Web Workers each have their own JS realm with their own singleton instance. Singletons are per-realm, not truly global.", tags: ["concept"] },
+  { q: "How do you share a Singleton across browser tabs?", a: "Each tab is a separate JS realm. Options:<ul><li><b>localStorage + storage event</b> — simple, persists</li><li><b>BroadcastChannel</b> — modern, message-based</li><li><b>SharedWorker</b> — true cross-tab singleton</li><li>Server + WebSocket — for real apps</li></ul>", tags: ["concept"] },
+  { q: "Write a Singleton WebSocket manager with auto-reconnect.", a: "<pre><code>class SocketManager {\n  static #instance;\n  constructor(url) {\n    if (SocketManager.#instance)\n      return SocketManager.#instance;\n    this.url = url;\n    this.connect();\n    SocketManager.#instance = this;\n  }\n  connect() {\n    this.ws = new WebSocket(this.url);\n    this.ws.onclose = () =&gt;\n      setTimeout(() =&gt; this.connect(), 1000);\n  }\n}\nexport default new SocketManager('wss://...');</code></pre>", tags: ["implementation"] },
+  { q: "Write a Singleton Event Bus with on/off/emit/once.", a: "<pre><code>class EventBus {\n  #listeners = new Map();\n  on(event, fn) {\n    if (!this.#listeners.has(event))\n      this.#listeners.set(event, new Set());\n    this.#listeners.get(event).add(fn);\n  }\n  off(event, fn) {\n    this.#listeners.get(event)?.delete(fn);\n  }\n  emit(event, data) {\n    this.#listeners.get(event)?.forEach(fn =&gt; fn(data));\n  }\n  once(event, fn) {\n    const wrap = d =&gt; { fn(d); this.off(event, wrap); };\n    this.on(event, wrap);\n  }\n}\nexport default new EventBus();</code></pre>", tags: ["implementation"] },
+  { q: "Why is module-level Singleton dangerous in Next.js SSR?", a: "Node <b>reuses modules across HTTP requests</b>. If your singleton holds user-specific state (current user, token), <b>request A's data leaks into request B</b>.<br><br><b>Fix</b>: don't store request-scoped state in a singleton; use <code>AsyncLocalStorage</code> or per-request context.", tags: ["ssr", "react"] },
+  { q: "How does HMR (Hot Module Replacement) affect Singletons?", a: "HMR can re-evaluate a module while the app runs, creating a <b>new singleton instance</b> while old references still point to the old one. Causes bugs only seen in dev. Use <code>module.hot.accept()</code> carefully.", tags: ["concept"] },
+  { q: "How do you make Singleton-using code testable in React?", a: "Three techniques:<ol><li><b>Inject</b> via Context or props instead of importing directly</li><li><b>Mock the module</b>: <code>jest.mock('./apiClient')</code></li><li>Expose a <b>reset method</b>: <code>apiClient.__resetForTests()</code></li></ol>", tags: ["testing", "react"] },
+  { q: "Can you break an ES Module Singleton?", a: "Pattern itself is solid, but real-world breakers:<ul><li><b>Bundler misconfiguration</b> — same package in two <code>node_modules</code> → two copies</li><li><b>Micro-frontends</b> — each bundles its own copy</li><li>Classic \"two copies of React\" error</li></ul><b>Fix</b>: webpack aliases, peer dependencies, or <code>window.__MY_SINGLETON__</code>", tags: ["concept"] },
+  { q: "Can DevTools mutate a client-side Singleton?", a: "<b>Yes.</b> Anything on the client is reachable. Never store secrets or trust the integrity of client-side singletons. Sensitive logic must be server-side.", tags: ["concept"] },
+  { q: "What happens to a userService Singleton on logout?", a: "Stale data lingers (cached user, tokens, in-flight requests). Must explicitly call <code>reset()</code> on logout. Subscribers/listeners must be cleaned up or you get memory leaks and \"ghost\" updates.", tags: ["react"] },
+  { q: "Two micro-frontends bundle two copies of a Singleton — how to fix?", a: "<ul><li><b>Module Federation</b> with <code>singleton: true, eager: true</code></li><li>Expose on window: <code>window.__MY_LIB__ = window.__MY_LIB__ || new MyLib()</code></li><li>Use peer dependencies + shared bundle</li></ul>", tags: ["concept"] },
+  { q: "How to test a component that uses a Singleton API client?", a: "<pre><code>jest.mock('./apiClient', () =&gt; ({\n  default: {\n    request: jest.fn().mockResolvedValue({ id: 1 })\n  }\n}));</code></pre>Or refactor to dependency injection — pass the client via Context/props.", tags: ["testing"] },
+  { q: "How to make a Singleton work across browser tabs?", a: "<pre><code>const channel = new BroadcastChannel('app');\nclass AuthManager {\n  logout() {\n    this.user = null;\n    channel.postMessage({ type: 'logout' });\n  }\n  constructor() {\n    channel.onmessage = (e) =&gt; {\n      if (e.data.type === 'logout')\n        this.user = null;\n    };\n  }\n}</code></pre>", tags: ["implementation"] },
+  { q: "Core mental model: when does <code>new</code> work?", a: "<b><code>new</code> only works on \"blueprints\" for creating objects.</b><ul><li>Class → ✅</li><li>Constructor function → ✅</li><li>Plain object with methods → ❌</li></ul>Quick check: <code>typeof X === \"function\"</code> → probably can use <code>new</code>.", tags: ["new-keyword"] },
+  { q: "What does <code>typeof Math</code> return?", a: "<code>\"object\"</code> → ❌ can't use <code>new Math()</code><br><br>Math is a plain namespace object, not a constructor.", tags: ["new-keyword"] },
+  { q: "What does <code>typeof Array</code> return?", a: "<code>\"function\"</code> → ✅ can use <code>new Array()</code><br><br>Array is a constructor.", tags: ["new-keyword"] },
+  { q: "Which JS built-ins are \"blueprints\" (use <code>new</code>)?", a: "<code>Array, Object, Date, Map, Set, Promise, Error, RegExp, WebSocket, FormData, XMLHttpRequest</code>", tags: ["new-keyword"] },
+  { q: "Which JS built-ins are \"toolboxes\" (don't use <code>new</code>)?", a: "<code>Math, JSON, console, localStorage, window, document, Reflect, Intl</code><br><br>These are JS's built-in singletons!", tags: ["new-keyword", "concept"] },
+  { q: "Can arrow functions be used with <code>new</code>?", a: "<b>No.</b><pre><code>const Foo = () =&gt; {};\nnew Foo();  // ❌ TypeError</code></pre>Arrow functions have no <code>[[Construct]]</code> internal method.", tags: ["new-keyword"] },
+  { q: "Can <code>Symbol</code> and <code>BigInt</code> be used with <code>new</code>?", a: "<b>No</b>, despite looking like constructors.<pre><code>Symbol('id');      // ✅\nnew Symbol('id');  // ❌ TypeError</code></pre>They are factory functions — call directly.", tags: ["new-keyword"] },
+  { q: "The most idiomatic Singleton implementation in modern JS?", a: "<b>ES Module export</b>:<pre><code>class MyService { /* ... */ }\nexport default new MyService();</code></pre>Module caching guarantees a single instance. No boilerplate needed.", tags: ["interview-answer", "implementation"] },
+  { q: "Interview answer: \"Is Singleton an anti-pattern?\"", a: "\"Situational. For stateless infrastructure (loggers, API clients, WebSocket managers) it's pragmatic and clean. For app state, it becomes an anti-pattern — hidden globals, testing pain, bypasses framework reactivity. Modern React/Vue prefer Context, stores, or DI for state.\"", tags: ["interview-answer"] },
+  { q: "Interview answer: \"Module vs Singleton pattern?\"", a: "\"ES modules are <b>implicitly</b> singletons — cached after first evaluation. The Singleton <i>pattern</i> adds explicit control: lazy init, private state via closures, enforcement of single instance. In most JS code, the module <b>is</b> the singleton.\"", tags: ["interview-answer"] },
+  { q: "Write the \"killer\" production API client Singleton.", a: "<pre><code>class ApiClient {\n  static #instance = null;\n  constructor(baseURL) {\n    if (ApiClient.#instance)\n      return ApiClient.#instance;\n    this.baseURL = baseURL;\n    this.token = null;\n    ApiClient.#instance = this;\n  }\n  setToken(token) { this.token = token; }\n  async request(path, options = {}) {\n    const headers = {\n      'Content-Type': 'application/json',\n      ...(this.token && {\n        Authorization: `Bearer ${this.token}`\n      }),\n      ...options.headers,\n    };\n    const res = await fetch(\n      `${this.baseURL}${path}`,\n      { ...options, headers }\n    );\n    if (!res.ok) throw new Error(`API ${res.status}`);\n    return res.json();\n  }\n}\nexport default new ApiClient('https://api.example.com');</code></pre>", tags: ["implementation", "interview-answer"] },
+  { q: "Why use <code>static #instance</code> (private) in a class Singleton?", a: "<ul><li><b>Tamper-proof</b> — can't be accessed/reassigned externally</li><li>Enforces encapsulation</li><li>Prevents accidental misuse from outside the class</li></ul>", tags: ["implementation"] },
+  { q: "Why does a class Singleton constructor return the existing instance?", a: "Handles the edge case where someone tries <code>new MyClass()</code> a second time. Without this, you'd get a fresh instance every time. With it: <code>new X() === new X()</code> is always <code>true</code>.", tags: ["implementation"] },
+  { q: "Predict: <code>new Math()</code>", a: "❌ <code>TypeError: Math is not a constructor</code><br><br>Math is a plain object (a toolbox), not a class/function.", tags: ["new-keyword"] },
+  { q: "Predict: <code>new JSON()</code>", a: "❌ <code>TypeError: JSON is not a constructor</code><br><br>JSON is a namespace object with parse/stringify methods.", tags: ["new-keyword"] },
+  { q: "Predict: <code>new Promise(() =&gt; {})</code>", a: "✅ Works. Promise is a constructor.", tags: ["new-keyword"] },
+  { q: "Predict: <code>new RegExp('abc')</code>", a: "✅ Works. RegExp is a constructor. (You can also use literal: <code>/abc/</code>.)", tags: ["new-keyword"] },
+  { q: "Predict: <code>new localStorage()</code>", a: "❌ <code>TypeError</code>. localStorage is a singleton Storage instance, not a constructor.", tags: ["new-keyword"] },
+  { q: "What's the connection between \"can't <code>new</code>\" and Singletons?", a: "JS's built-in toolboxes (<code>Math, JSON, console</code>) are <b>language-enforced singletons</b>. The inability to <code>new</code> them <b>is</b> the singleton enforcement mechanism. Language designers made them plain objects specifically so you can't create more.", tags: ["new-keyword", "concept"] },
+  { q: "Best long-term retention method for revising this material?", a: "<b>Active recall + spaced repetition</b>. Just re-reading notes = ~20% retention after a month. Flashcards with spaced repetition = ~80%+. Show up daily, even 5 minutes — consistency beats intensity.", tags: ["concept"] }
+];
+
+// ============ STATE ============
+const STORAGE_KEY = 'singleton-cards-progress-v1';
+let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+let activeFilter = 'all';
+let searchTerm = '';
+let cardOrder = cards.map((_, i) => i);
+
+// ============ RENDER ============
+const container = document.getElementById('cards-container');
+
+function render() {
+  container.innerHTML = '';
+  let visibleCount = 0;
+
+  cardOrder.forEach(originalIdx => {
+    const card = cards[originalIdx];
+    const status = progress[originalIdx] || null;
+
+    // Apply filter
+    if (activeFilter === 'review') {
+      if (status !== 'review') return;
+    } else if (activeFilter !== 'all') {
+      if (!card.tags.includes(activeFilter)) return;
+    }
+
+    // Apply search
+    if (searchTerm) {
+      const text = (card.q + ' ' + card.a).toLowerCase();
+      if (!text.includes(searchTerm.toLowerCase())) return;
+    }
+
+    visibleCount++;
+
+    const el = document.createElement('div');
+    el.className = 'card' + (status ? ' ' + status : '');
+    el.dataset.idx = originalIdx;
+    el.innerHTML = `
+      <div class="card-header">
+        <span class="card-num">№ ${String(originalIdx + 1).padStart(2, '0')}</span>
+        <div class="card-tags">${card.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="card-body">
+        <div class="card-question">${card.q}</div>
+        <div class="card-answer">${card.a}</div>
+        <div class="card-hint">Tap to reveal →</div>
+      </div>
+      <div class="card-actions">
+        <button class="mark-btn ${status === 'known' ? 'known' : ''}" data-action="known">✓ Got it</button>
+        <button class="mark-btn ${status === 'review' ? 'review' : ''}" data-action="review">↻ Review</button>
+      </div>
+    `;
+
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('mark-btn')) {
+        e.stopPropagation();
+        const action = e.target.dataset.action;
+        const idx = parseInt(el.dataset.idx);
+        if (progress[idx] === action) {
+          delete progress[idx];
+        } else {
+          progress[idx] = action;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        updateStats();
+        render();
+        return;
+      }
+      el.classList.toggle('flipped');
+    });
+
+    container.appendChild(el);
+  });
+
+  if (visibleCount === 0) {
+    container.innerHTML = '<div class="empty">No cards match this filter.</div>';
+  }
+}
+
+function updateStats() {
+  const known = Object.values(progress).filter(v => v === 'known').length;
+  const review = Object.values(progress).filter(v => v === 'review').length;
+  document.getElementById('stat-known').textContent = known;
+  document.getElementById('stat-review').textContent = review;
+  document.getElementById('stat-progress').textContent =
+    Math.round((known / cards.length) * 100) + '%';
+}
+
+// ============ EVENT LISTENERS ============
+document.getElementById('search').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.filter;
+    render();
+  });
+});
+
+document.getElementById('shuffle-btn').addEventListener('click', () => {
+  cardOrder = cardOrder.sort(() => Math.random() - 0.5);
+  render();
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Reset all progress? This will clear your "got it" and "review" marks.')) {
+    progress = {};
+    localStorage.removeItem(STORAGE_KEY);
+    cardOrder = cards.map((_, i) => i);
+    updateStats();
+    render();
+  }
+});
+
+// ============ INIT ============
+updateStats();
+render();
+</script>
+
+</body>
+</html>
